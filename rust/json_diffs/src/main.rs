@@ -1,5 +1,6 @@
-use serde_json::Value;
+use serde_json::{json, Value};
 use std::fs;
+use std::time::Instant;
 use log::{info, warn};
 
 fn main() {
@@ -7,6 +8,7 @@ fn main() {
     env_logger::init();
 
     // Example of reading and parsing JSON files
+    // Before commit
     //"path/to/your/first.json"
     //"path/to/your/second.json"
     let json_str1 = fs::read_to_string("/Users/dlozina/workspace/NBA POC DATA/latest NBA data schema/test diff/macrometa_pbp_0022300336.json").expect("Failed to read first file");
@@ -15,57 +17,57 @@ fn main() {
     let json1: Value = serde_json::from_str(&json_str1).expect("Failed to parse first JSON");
     let json2: Value = serde_json::from_str(&json_str2).expect("Failed to parse second JSON");
 
-    let differences = compare_json(&json1, &json2, "");
-    if differences.is_empty() {
-        info!("No differences found");
-    } else {
-        for diff in differences {
-            warn!("{}", diff); // Logging differences as warnings
+    // Start timing
+    let start = Instant::now();
+    let differences = compare_json(&json1, &json2);
+    // End timing
+    let duration = start.elapsed();
+
+    // Convert differences to a JSON string for display or storage
+    let diffs_json_str = serde_json::to_string_pretty(&differences).expect("Failed to serialize differences");
+    println!("{}", diffs_json_str);
+
+    // Print out the execution time
+    println!("Execution time: {} ms", duration.as_millis());
+}
+
+fn compare_json(a: &Value, b: &Value) -> Value {
+    match (a, b) {
+        (Value::Object(map1), Value::Object(map2)) => {
+            let mut diffs = serde_json::Map::new();
+            for (key, val1) in map1 {
+                let val2 = map2.get(key).unwrap_or(&Value::Null);
+                let child_diffs = compare_json(val1, val2);
+                if child_diffs != Value::Null {
+                    diffs.insert(key.clone(), child_diffs);
+                }
+            }
+            // Here we don't check the keys from the first JSON absent in the second,
+            // since we only want to display changes that exist in the second JSON
+            if diffs.is_empty() { Value::Null } else { Value::Object(diffs) }
+        },
+        (Value::Array(arr1), Value::Array(arr2)) => {
+            let mut diffs = vec![];
+            let max_len = std::cmp::max(arr1.len(), arr2.len());
+            for i in 0..max_len {
+                let val1 = arr1.get(i).unwrap_or(&Value::Null);
+                let val2 = arr2.get(i).unwrap_or(&Value::Null);
+                let child_diffs = compare_json(val1, val2);
+                if child_diffs != Value::Null {
+                    // Here we only push changes from the second array
+                    diffs.push(child_diffs);
+                }
+            }
+            if diffs.is_empty() { Value::Null } else { Value::Array(diffs) }
+        },
+        _ => {
+            if a != b {
+                b.clone() // Instead of showing "changed_from" and "changed_to", only show the new value
+            } else {
+                Value::Null // No difference
+            }
         }
     }
 }
 
-fn compare_json(a: &Value, b: &Value, path: &str) -> Vec<String> {
-    let mut differences = Vec::new();
-    match (a, b) {
-        (Value::Object(map1), Value::Object(map2)) => {
-            for (key, val1) in map1 {
-                let new_path = if path.is_empty() { key.clone() } else { format!("{}.{}", path, key) };
-                let val2 = map2.get(key);
-                differences.extend(compare_json(val1, &val2.unwrap_or(&Value::Null), &new_path));
-            }
-            // Check for keys in b that are not in a
-            for key in map2.keys() {
-                if !map1.contains_key(key) {
-                    let new_path = if path.is_empty() { key.clone() } else { format!("{}.{}", path, key) };
-                    differences.push(format!("Key '{}' found in the second JSON but not in the first. Path: {}", key, new_path));
-                }
-            }
-        },
-        (Value::Array(arr1), Value::Array(arr2)) => {
-            for (index, item) in arr1.iter().enumerate() {
-                if index < arr2.len() {
-                    let new_path = format!("{}[{}]", path, index);
-                    differences.extend(compare_json(item, &arr2[index], &new_path));
-                } else {
-                    let new_path = format!("{}[{}]", path, index);
-                    differences.push(format!("Missing item at index {} in the second JSON. Path: {}", index, new_path));
-                }
-            }
-            // Check if the second array has more items than the first
-            if arr2.len() > arr1.len() {
-                for extra_index in arr1.len()..arr2.len() {
-                    let new_path = format!("{}[{}]", path, extra_index);
-                    differences.push(format!("Additional item at index {} in the second JSON. Path: {}", extra_index, new_path));
-                }
-            }
-        },
-        // This will handle all types of values (Strings, Numbers, etc.)
-        _ => {
-            if a != b {
-                differences.push(format!("Difference found at path '{}': '{}' (first) vs '{}' (second)", path, a, b));
-            }
-        }
-    }
-    differences
-}
+
