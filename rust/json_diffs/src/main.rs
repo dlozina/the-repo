@@ -11,8 +11,8 @@ fn main() {
     // Before commit
     //"path/to/your/first.json"
     //"path/to/your/second.json"
-    let json_str1 = fs::read_to_string("/Users/dlozina/workspace/NBA POC DATA/latest NBA data schema/test diff/macrometa_pbp_0022300336.json").expect("Failed to read first file");
-    let json_str2 = fs::read_to_string("/Users/dlozina/workspace/NBA POC DATA/latest NBA data schema/test diff/macrometa_pbp_0022300336 copy.json").expect("Failed to read second file");
+    let json_str1 = fs::read_to_string("path/to/your/first.json").expect("Failed to read first file");
+    let json_str2 = fs::read_to_string("path/to/your/second.json").expect("Failed to read second file");
 
     let json1: Value = serde_json::from_str(&json_str1).expect("Failed to parse first JSON");
     let json2: Value = serde_json::from_str(&json_str2).expect("Failed to parse second JSON");
