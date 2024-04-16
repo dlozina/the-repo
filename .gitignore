@@ -4,4 +4,4 @@
 .DS_Store
 
 #Rust
-/target
+**/target/
