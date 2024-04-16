@@ -20,7 +20,7 @@ fn main() {
         .unwrap();
 
     // Create a semaphore with 4 permits
-    let semaphore = Arc::new(Semaphore::new(4));
+    let semaphore = Arc::new(Semaphore::new(1));
 
     // Collect all the handles from spawned tasks
     let mut handles = Vec::new();
