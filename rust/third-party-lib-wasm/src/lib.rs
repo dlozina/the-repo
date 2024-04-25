@@ -1,6 +1,4 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+pub mod wasm;
 
 #[cfg(test)]
 mod tests {
@@ -8,7 +6,9 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+        unsafe {
+            let result = wasm::add(2, 2);
+            assert_eq!(result, 4);
+        }
     }
 }
