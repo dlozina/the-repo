@@ -7,7 +7,8 @@ fn main() {
     }
 }
 
-
+// Note: This code needs to be compiled with the following command:
+// cargo build --release --target wasm32-wasi
 #[cfg(test)]
 mod tests {
     use super::*;
