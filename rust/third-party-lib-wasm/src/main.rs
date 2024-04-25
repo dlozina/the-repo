@@ -1,5 +1,13 @@
 pub mod wasm;
 
+fn main() {
+    unsafe {
+        let result = wasm::add(2, 2);
+        println!("2 + 2 = {}", result);
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
