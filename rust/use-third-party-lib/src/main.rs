@@ -8,7 +8,6 @@ type HelloUserFunc = fn(name: &str, surname: &str) -> String;
 
 fn main() {
     const LIBRARY_PATH: &str = "/Users/dlozina/workspace/my/the-repo/rust/use-third-party-lib/src/lib/libthird_party_lib.dylib";
-
     unsafe {
         let lib = Library::new(LIBRARY_PATH).unwrap();
 
