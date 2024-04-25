@@ -9,6 +9,8 @@ edition = "2021"
 [lib]
 # Creates a ***.rlib file
 #crate-type = ["staticlib"]
-crate-type = ["cdylib"]
+# Generate .dylib file
+#crate-type = ["cdylib"]
+crate-type = ["staticlib"]
 
 [dependencies]
