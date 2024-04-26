@@ -4,6 +4,12 @@ fn main() {
     unsafe {
         let result = wasm::add(2, 2);
         println!("2 + 2 = {}", result);
+
+        let hello = wasm::hello_world();
+        print!("{}\n", hello);
+
+        let hello_user = wasm::hello_user("Dino", "Lozina");
+        print!("{} how are you?\n", hello_user)
     }
 }
 
