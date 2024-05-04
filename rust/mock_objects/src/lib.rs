@@ -1,3 +1,4 @@
+// Mock Objects -> Interior Mutability
 pub trait Messenger {
     fn send(&self, msg: &str );
 }
@@ -20,6 +21,7 @@ impl <'a, T> LimitTracker<'a, T> where T: Messenger {
         }
     }
 
+    // Method to test
     pub fn set_value(&mut self, value: usize){
         self.value = value;
 
@@ -32,5 +34,40 @@ impl <'a, T> LimitTracker<'a, T> where T: Messenger {
         }else if percentage_of_max >= 0.75 {
             self.messenger.send("Warning: You are at 75% of your quota!")
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct MockMessenger {
+        sent_messages: Vec<String>
+    }
+
+    impl MockMessenger {
+        fn new() -> MockMessenger{
+            MockMessenger{
+                sent_messages: vec![]
+            }
+        }
+    }
+
+    impl Messenger for MockMessenger{
+        fn send(&self, message: &str) {
+            self.sent_messages.push(String::from(message));
+        }
+    }
+
+    #[test]
+    fn it_sends_an_over_75_percent_warning_message(){
+        let mock_messenger = MockMessenger::new();
+        let mut limit_tracker = LimitTracker::new(
+            &mock_messenger,
+            100
+        );
+        limit_tracker.set_value(80);
+
+        assert_eq!(mock_messenger.sent_messages.len(), 1);
     }
 }
