@@ -1,3 +1,4 @@
+use ansi_term::Color::{Red, Green};
 use clap::Parser;
 // anyhow error handling
 use anyhow::{Context, Result};
@@ -30,7 +31,7 @@ fn main() -> Result<()> {
     let args = Cli::parse();
 
     let content = std::fs::read_to_string(&args.path)
-        .with_context(|| format!("could not read file `{}`", args.path.display()))?;
+        .with_context(|| format!("{} {}", Red.paint("could not read file:"), Green.paint(args.path.display().to_string())))?;
 
     for line in content.lines() {
         if line.contains(&args.pattern) {
