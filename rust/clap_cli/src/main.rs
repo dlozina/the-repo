@@ -1,7 +1,7 @@
-use ansi_term::Color::{Red, Green};
 use clap::Parser;
 // anyhow error handling
 use anyhow::{Context, Result};
+use clap_cli::find_matches;
 
 /// Search for a pattern in a file and display the lines that contain it.
 #[derive(Parser)]
@@ -39,14 +39,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn find_matches(content: &str, pattern: &str, mut writer: impl std::io::Write) {
-    for line in content.lines() {
-        if line.contains(pattern) {
-            writeln!(writer, "{}", line);
-        }
-    }
-}
-
+// unit test
 #[test]
 fn find_a_match() {
     let mut result = Vec::new();
